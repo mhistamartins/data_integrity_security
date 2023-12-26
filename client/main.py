@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import serial.tools.list_ports
 
 # Function to toggle session button label
 def toggle_session():
@@ -9,6 +10,11 @@ def toggle_session():
     else:
         session_state.set("Active")
         session_button.config(text="Close Session")
+
+# Function to get available serial ports
+def get_serial_ports():
+    ports = [port.device for port in serial.tools.list_ports.comports()]
+    return ports
 
 # create root window
 root = tk.Tk()
@@ -27,15 +33,15 @@ n = tk.StringVar()
 portchoosen = ttk.Combobox(root, width=12,
                            textvariable=n)
 
-# Adding combobox drop down list
-portchoosen['values'] = ('port1',
-                         'port2',
-                         'port3')
+# Get available serial ports dynamically
+serial_ports = get_serial_ports()
+portchoosen['values'] = tuple(serial_ports)  # Set values to available ports
+
+# If no ports are available, set default value
+if serial_ports:
+    portchoosen.current(0)  # Set default to the first port
 
 portchoosen.grid(column=2, row=0)
-
-# Default port
-portchoosen.current(1)
 
 # Variable to track session state
 session_state = tk.StringVar(root, "Inactive")
