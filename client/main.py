@@ -25,13 +25,10 @@ root.geometry('630x500')
 
 
 # Label
-ttk.Label(root, text="Serial Ports:",
-          font=("Times New Roman", 15)).grid(column=1,
-                                             row=0, padx=10, pady=25)
+ttk.Label(root, text="Serial Ports:", font=("Times New Roman", 15)).grid(column=1, row=0, padx=10, pady=25)
 
 n = tk.StringVar()
-portchoosen = ttk.Combobox(root, width=12,
-                           textvariable=n)
+portchoosen = ttk.Combobox(root, width=12,textvariable=n)
 
 # Get available serial ports dynamically
 serial_ports = get_serial_ports()
@@ -54,15 +51,20 @@ session_button.grid(column=3, row=0)
 button1 = tk.Button(root, text="Establish Session")
 button2 = tk.Button(root, text="Get Temperature")
 button3 = tk.Button(root, text="Toggle Led")
-button4 = tk.Button(root, text="log:")
-button5 = tk.Button(root, text="clear", fg="blue")
+button4 = tk.Button(root, text="clear", fg="blue")
 
 # set Button grid
 button1.grid(column=3, row=0)
 button2.grid(column=4, row=0)
 button3.grid(column=5, row=0)
-button4.grid(column=1, row=1)
-button5.grid(column=5, row=1)
+button4.grid(column=5, row=1)
+
+#labels
+label1 = tk.Label(root, text="log:")
+
+# Grid labels in the root window
+label1.grid(column=1, row=1)
+
 
 # Frame below the buttons
 frame = tk.Frame(root, width=600, height=380, bg="lightgrey")
