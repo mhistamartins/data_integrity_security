@@ -18,7 +18,7 @@
 
 [ReqId:01.2v01]: it shall be possible to configure necessary serial communication settings (baud rate, parity, etc.) for reliable data exchange.
 
-[ReqId:02v01]: it shall be possible to have a function to initialize a session between the client and server.
+[ReqId:02v01]: it shall be possible to have a function to establish a session between the client and server.
 
 [ReqId:03v01]: it shall be possible to have a function to terminate a session between the client and server.
 
