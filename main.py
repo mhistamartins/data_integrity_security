@@ -1,112 +1,124 @@
 import tkinter as tk
 from tkinter import ttk
-import serial.tools.list_ports
-from protocol import protocol_init, protocol_send, protocol_receive
+import serial
+import time
+import protocol
 
-# Function to get a list of available serial ports
-def get_serial_ports():
-    return [port.device for port in serial.tools.list_ports.comports()]
 
-# Function to update the log in the GUI
-def update_log(message):
-    log_text.config(state=tk.NORMAL)         # Enable text widget for editing
-    log_text.insert(tk.END, message + "\n")  # Insert the message at the end of the log
-    log_text.config(state=tk.DISABLED)       # Disable text widget for read-only
+class ClientGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Client")
 
-# Function to toggle the session state
-def toggle_session():
-    new_state = "Inactive" if session_state.get() == "Active" else "Active"
-    session_state.set(new_state)
-    
-    session_button.config(text="Close Session" if new_state == "Active" else "Establish Session")
+        self.session_active = False
 
-    # Enable/Disable buttons based on the session state
-    button2.config(state=tk.NORMAL if new_state == "Active" else tk.DISABLED)
-    button3.config(state=tk.NORMAL if new_state == "Active" else tk.DISABLED)
+        self.selected_port = tk.StringVar()
+        self.log_text = tk.StringVar()
 
-    update_log("Session {}.".format("closed" if new_state == "Inactive" else "established"))
+        self.create_widgets()
 
-# Function to establish a session
-def establish_session(session_state, portchoosen, button2, button3):
-    if session_state.get() == "Inactive":
-        protocol_init(portchoosen.get())    # Initialize with the selected serial port
-        protocol_send("ESTABLISH_SESSION")  # Send a command to establish the session
-        response = protocol_receive()       # Receive the response from the protocol
+    def create_widgets(self):
+        # GUI components
+        self.port_label = ttk.Label(self.master, text="Select Port:")
+        self.port_combobox = ttk.Combobox(self.master, textvariable=self.selected_port)
+        self.port_combobox['values'] = protocol.enumerate_serial_ports()
 
-        if response == "SESSION_ESTABLISHED":
-            update_log("Session established successfully.")
+        self.session_button = ttk.Button(self.master, text="Establish Session", command=self.toggle_session)
+
+        self.get_temp_button = ttk.Button(self.master, text="Get Temperature", command=self.get_temperature)
+        self.toggle_led_button = ttk.Button(self.master, text="Toggle LED", command=self.toggle_led)
+        self.clear_log_button = ttk.Button(self.master, text="Clear", command=self.clear_log)
+
+        self.log_label = ttk.Label(self.master, text="Log:")
+        self.log_textbox = tk.Text(self.master, height=23, width=50)
+        self.log_textbox.insert(tk.END, "Log messages will appear here.\n")
+        self.log_textbox.configure(state='disabled')
+
+        # Layout
+        self.port_label.grid(row=0, column=0, padx=5, pady=5)
+        self.port_combobox.grid(row=0, column=1, padx=5, pady=5)
+        self.session_button.grid(row=0, column=2, padx=5, pady=5)  
+        self.get_temp_button.grid(row=0, column=3, padx=5, pady=5)
+        self.toggle_led_button.grid(row=0, column=4, padx=5, pady=5)
+        self.clear_log_button.grid(row=1, column=4, columnspan=2, padx=5, pady=5)
+        self.log_label.grid(row=1, column=0, padx=5, pady=5)
+        self.log_textbox.grid(row=2, column=0, columnspan=6, padx=5, pady=5, sticky="nsew")
+
+
+    def toggle_session(self):
+        if not self.session_active:
+            port = self.selected_port.get()
+            if port:
+                try:
+                    protocol.protocol_init(port)
+                    self.session_active = True
+                    protocol.protocol_send("Establish_Session")  # Send command to establish session
+                    self.session_button.configure(text="Close Session")
+                    self.log_message("Session established.")
+
+                    # Enable the get temp button
+                    self.get_temp_button.configure(state="normal")
+
+                    # Enable the Toggle LED button
+                    self.toggle_led_button.configure(state="normal")
+                except Exception as e:
+                    self.log_message(f"Error establishing session: {str(e)}")
+            else:
+                self.log_message("Please select a port.")
         else:
-            update_log("Failed to establish session. {}".format(response))
+            protocol.protocol_send("Close_Session")  # Send command to close session
+            protocol.ser.close()
+            self.session_active = False
+            self.session_button.configure(text="Establish Session")
+            self.log_message("Session closed.")
 
-# Function to toggle the LED
-def toggle_led(session_state):
-    if session_state.get() == "Active":
-        protocol_send("TOGGLE_LED")        # Send a command to toggle the LED
-        response = protocol_receive()       # Receive the response from the protocol
 
-        if response == "LED_TOGGLED":
-            update_log("LED toggled successfully.")
+    def get_temperature(self):
+        if self.session_active:
+            # Send command to server to get temperature
+            protocol.protocol_send("GET_TEMPERATURE")
+
+            # Receive temperature value from server
+            temperature_response = protocol.protocol_receive()
+            if temperature_response.startswith("Temperature:"):
+                temperature_value = temperature_response.split(":")[1].strip()
+                self.log_message(f"Temperature: {temperature_value}")  # Display temperature in log message box
+            else:
+                self.log_message("Failed to retrieve temperature data from server.")
         else:
-            update_log("Failed to toggle LED. {}".format(response))
+            self.get_temp_button.configure(state="disabled")
+            self.log_message("No active session.")
 
-# Function to get the temperature
-def get_temperature(session_state):
-    if session_state.get() == "Active":
-        protocol_send("GET_TEMPERATURE")   # Send a command to get the temperature
-        response = protocol_receive()       # Receive the response from the protocol
+    def toggle_led(self):
+        if self.session_active:
+            protocol.protocol_send("TOGGLE_LED")
 
-        if response.startswith("TEMPERATURE:"):
-            temperature_value = response.split(":")[1]
-            update_log("Temperature: {} °C".format(temperature_value))
+            # Receive Toggle led message
+            led_response = protocol.protocol_receive()
+
+            # Update the log message box
+            self.log_message(led_response.strip())
         else:
-            update_log("Failed to get temperature. {}".format(response))
+            self.log_message("No active session.")
+            self.toggle_led_button.configure(state="disabled")
+
+    def clear_log(self):
+        self.log_textbox.configure(state='normal')
+        self.log_textbox.delete(1.0, tk.END)
+        self.log_textbox.configure(state='disabled')
+
+    def log_message(self, message):
+        self.log_textbox.configure(state='normal')
+        self.log_textbox.insert(tk.END, f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}\n")
+        self.log_textbox.configure(state='disabled')
 
 
-def setup_gui():
-    global session_state, session_button, button2, button3, log_text
+def main():
     root = tk.Tk()
-    root.title("Client")
-    root.geometry('630x500')
-
-    # Serial Ports
-    ttk.Label(root, text="Serial Ports:", font=("Times New Roman", 15)).grid(column=1, row=0, padx=10, pady=25)
-
-    n = tk.StringVar()
-    portchoosen = ttk.Combobox(root, width=12, textvariable=n)
-    serial_ports = get_serial_ports()
-    portchoosen['values'] = tuple(serial_ports)
-    portchoosen.current(0) if serial_ports else None
-    portchoosen.grid(column=2, row=0)
-
-    # Session
-    session_state = tk.StringVar(root, "Inactive")
-    session_button = tk.Button(root, text="Establish Session", command=toggle_session)
-    session_button.grid(column=3, row=0)
-
-    # Buttons
-    button1 = tk.Button(root, text="Establish Session", command=establish_session)
-    button2 = tk.Button(root, text="Get Temperature", state=tk.DISABLED, command=get_temperature)
-    button3 = tk.Button(root, text="Toggle LED", state=tk.DISABLED, command=toggle_led)
-    button4 = tk.Button(root, text="clear", fg="blue")
-
-
-    # set Button grid
-    button1.grid(column=3, row=0)
-    button2.grid(column=4, row=0)
-    button3.grid(column=5, row=0)
-    button4.grid(column=5, row=1)
-
-    # Labels
-    ttk.Label(root, text="log:", font=("Times New Roman", 15)).grid(column=1, row=1)
-
-    # Frame below the buttons
-    frame = tk.Frame(root, width=600, height=380, bg="lightgrey")
-    frame.grid(column=0, row=2, columnspan=25)
-
-    return root
-
-# Execute Tkinter
-if __name__ == "__main__":
-    root = setup_gui()
+    root.geometry("730x400")
+    app = ClientGUI(root)
     root.mainloop()
 
+
+if __name__ == "__main__":
+    main()
