@@ -6,7 +6,7 @@ ser = None  # Serial connection object
 def enumerate_serial_ports():
     return [port.device for port in serial.tools.list_ports.comports()]
 
-def protocol_init(port, baudrate=9600):
+def protocol_init(port, baudrate=115200):
     global ser
     ser = serial.Serial(port, baudrate)
 

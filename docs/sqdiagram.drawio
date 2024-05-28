@@ -1,0 +1,102 @@
+<mxfile host="65bd71144e">
+    <diagram id="2otbELnxy8FuXvAZz_3x" name="Page-1">
+        <mxGraphModel dx="667" dy="420" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="" style="shape=umlLifeline;participant=umlActor;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;size=70;" vertex="1" parent="1">
+                    <mxGeometry x="90" y="100" width="20" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;" vertex="1" parent="2">
+                    <mxGeometry x="5" y="175" width="10" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="client" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="70" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="" style="shape=umlLifeline;participant=umlActor;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;size=70;" vertex="1" parent="1">
+                    <mxGeometry x="490" y="90" width="20" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;" vertex="1" parent="4">
+                    <mxGeometry x="5" y="290" width="10" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="server" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="490" y="70" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="encrypted (Spub, Cpub) + Hmac" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;" edge="1" parent="1" target="2">
+                    <mxGeometry x="-0.0012" relative="1" as="geometry">
+                        <mxPoint x="500" y="310" as="sourcePoint"/>
+                        <mxPoint x="130" y="310" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9" value="Generate RSA-2048" style="edgeStyle=orthogonalEdgeStyle;html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;" edge="1" target="4" parent="1" source="4">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="430" y="160" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="550" y="160"/>
+                            <mxPoint x="550" y="190"/>
+                        </Array>
+                        <mxPoint x="435" y="220" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="11" value="Generate a temporary RSA-2048 pair" style="edgeStyle=orthogonalEdgeStyle;html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="100" y="210" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="156.5" y="210"/>
+                            <mxPoint x="156.5" y="240"/>
+                        </Array>
+                        <mxPoint x="100" y="240" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="12" value="Hash the secret using SHA256" style="edgeStyle=orthogonalEdgeStyle;html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="100" y="170" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="156.5" y="170"/>
+                            <mxPoint x="156.5" y="200"/>
+                        </Array>
+                        <mxPoint x="100" y="200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="13" value="client Pkey + Hmac" style="endArrow=open;endSize=12;dashed=1;html=1;" edge="1" parent="1" target="4">
+                    <mxGeometry x="0.0013" width="160" relative="1" as="geometry">
+                        <mxPoint x="100" y="270" as="sourcePoint"/>
+                        <mxPoint x="260" y="270" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="14" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="100" y="320" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="150.5" y="320"/>
+                            <mxPoint x="150.5" y="350"/>
+                        </Array>
+                        <mxPoint x="100" y="350" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="16" value="&lt;pre&gt;&lt;code class=&quot;!whitespace-pre hljs language-plaintext&quot;&gt;Encrypted (Cpub + Signed_secret)Spub + Hmac&lt;/code&gt;&lt;/pre&gt;" style="endArrow=open;endSize=12;dashed=1;html=1;" edge="1" parent="1">
+                    <mxGeometry x="0.0013" width="160" relative="1" as="geometry">
+                        <mxPoint x="100" y="370" as="sourcePoint"/>
+                        <mxPoint x="499.5" y="370" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="19" value="&lt;pre&gt;&lt;code class=&quot;!whitespace-pre hljs language-plaintext&quot;&gt;Encrypted (status, Cpub) + Hmac&lt;/code&gt;&lt;/pre&gt;" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;" edge="1" parent="1">
+                    <mxGeometry x="-0.1011" y="20" relative="1" as="geometry">
+                        <mxPoint x="500.5" y="460" as="sourcePoint"/>
+                        <mxPoint x="100" y="460" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="24" value="Cpub" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="500" y="360" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="Spub" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="310" width="60" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
