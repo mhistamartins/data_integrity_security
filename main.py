@@ -3,7 +3,6 @@ from tkinter import ttk
 import serial
 import time
 import protocol
-from mbedtls import pk
 
 
 class ClientGUI:
@@ -83,7 +82,7 @@ class ClientGUI:
             temperature_response = protocol.protocol_receive()
             if temperature_response.startswith("Temperature:"):
                 temperature_value = temperature_response.split(":")[1].strip()
-                self.log_message(f"Temperature: {temperature_value}")  # Display temperature in log message box
+                self.log_message(f"Temperature: {temperature_value} ˚C")  # Display temperature in log message box
             else:
                 self.log_message("Failed to retrieve temperature data from server.")
         else:
