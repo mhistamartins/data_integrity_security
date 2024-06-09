@@ -5,12 +5,6 @@
 // Define the pin for the LED
 const int ledPin = 21;
 
-// Define command constants
-const uint8_t SESSION_ESTABLISH = 0x01;
-const uint8_t CLOSE_SESSION = 0x02;
-const uint8_t GET_TEMPERATURE = 0x03;
-const uint8_t TOGGLE_LED = 0x04;
-
 void setup() 
 {
     // Initialize serial communication at the defined baud rate
