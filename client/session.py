@@ -25,7 +25,7 @@ class Session:
         self.state = port
 
         # Initialize protocol with the specified port
-        if protocol.protocol_init(port):
+        if protocol.init(port):
             self.__clientRSA = pk.RSA()
             self.__clientRSA.generate(Session.RSA_SIZE * 8, Session.EXPONENT)
             
@@ -82,11 +82,11 @@ class Session:
         # Update HMAC with the buffer and append the HMAC digest
         self.HMAC_CS.update(buf)
         buf += self.HMAC_CS.digest()
-        return protocol.protocol_send(buf)
+        return protocol.send(buf)
 
     def receive(self, size: int) -> bytes:
         # Receive data with HMAC digest from the protocol
-        buffer = protocol.protocol_receive(size + self.HMAC_CS.digest_size)
+        buffer = protocol.receive(size + self.HMAC_CS.digest_size)
         self.HMAC_CS.update(buffer[0:size])
 
         # Verify HMAC and return the buffer if valid, otherwise return empty bytes

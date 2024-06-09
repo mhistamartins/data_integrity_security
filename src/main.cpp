@@ -1,58 +1,75 @@
 #include <Arduino.h>
-#include <esp_system.h>
-#include "protocol.h"
+#include "session.h"
 
-// Define the pin for the LED
-const int ledPin = 21;
+// Define the pin number for the LED
+#define LED_PIN 21
 
-void setup() 
+// Variable to keep track of the LED state (LOW for off, HIGH for on)
+int ledState = LOW;
+
+// Function to toggle the state of the LED
+static void toggle_led(void)
 {
-    // Initialize serial communication at the defined baud rate
-    protocol_init();
-    
-    // Initialize the LED pin as an output
-    pinMode(ledPin, OUTPUT);
-    digitalWrite(ledPin, LOW);
+  // Toggle the LED state
+  ledState = !ledState;
+  // Write the new state to the LED pin
+  digitalWrite(LED_PIN, ledState);
 }
 
-void loop() 
+// Arduino setup function, runs once at startup
+void setup()
 {
-    // Buffer to hold incoming data
-    uint8_t buffer[64];
-    size_t len = protocol_receive(buffer, sizeof(buffer));
+  // Set the LED pin as an output
+  pinMode(LED_PIN, OUTPUT);
+  // Set GPIO pin 21 as an output (redundant since LED_PIN is also 21)
+  pinMode(GPIO_NUM_21, OUTPUT);
+  // Delay for 100 milliseconds
+  delay(100);
+  // Initialize the session
+  session_init();
+}
 
-    // If data is received
-    if (len == 1) 
-    {
-        switch (buffer[0]) 
-        {
-            case SESSION_ESTABLISH:
-                protocol_send(buffer, 1);
-                break;
+// Arduino loop function, runs repeatedly after setup
+void loop()
+{
+  // Initialize a response structure
+  response_t respond = {0};
 
-            case CLOSE_SESSION:
-                protocol_send(buffer, 1);
-                break;
+  // Get the current session request
+  int request = session_request();
 
-            case GET_TEMPERATURE:
-                {
-                    float temperature = temperatureRead();
-                    protocol_send((uint8_t*)&temperature, sizeof(temperature));
-                }
-                break;
+  // Set GPIO pin 32 to LOW
+  digitalWrite(GPIO_NUM_32, LOW);
 
-            case TOGGLE_LED:
-                {
-                    digitalWrite(ledPin, !digitalRead(ledPin));
-                    uint8_t response[1] = {TOGGLE_LED};
-                    protocol_send(response, 1);
-                }
-                break;
+  // Check if the request is to get the temperature
+  if (request == SESSION_TEMPERATURE)
+  {
+    // Indicate a successful response
+    respond.data[0] = SESSION_OKAY;
+    // Read the temperature and store it in the response data
+    sprintf((char *)&respond.data[1], "%2.2f", temperatureRead());
 
-            default:
-                // Handle unrecognized command
-                protocol_send((uint8_t*)"Unknown command.", 16);
-                break;
-        }
-    }
+    // Send the response
+    request = session_response(&respond);
+  }
+  // Check if the request is to toggle the LED
+  else if (request == SESSION_TOGGLE_LED)
+  {
+    // Indicate a successful response
+    respond.data[0] = SESSION_OKAY;
+    // Toggle the LED
+    toggle_led();
+
+    // Store the new LED state in the response data
+    sprintf((char *)&respond.data[1], "%d", ledState);
+    // Send the response
+    request = session_response(&respond);
+  }
+
+  // Check if there was an error in the session
+  if (request == SESSION_ERROR)
+  {
+    // Set GPIO pin 32 to HIGH to indicate an error
+    digitalWrite(GPIO_NUM_32, HIGH);
+  }
 }

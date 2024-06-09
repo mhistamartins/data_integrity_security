@@ -6,12 +6,12 @@ ser: serial.Serial  # Serial connection object
 def enumerate_serial_ports():
     return [port.device for port in serial.tools.list_ports.comports()]
 
-def protocol_init(port, baudrate=115200) -> bool:
+def init(port, baudrate=115200) -> bool:
     global ser
     ser = serial.Serial(port, baudrate)
     return ser.is_open
 
-def protocol_send(data) -> bool:
+def send(data) -> bool:
     global ser
     ret = False
     if ser.is_open == True:
@@ -19,7 +19,7 @@ def protocol_send(data) -> bool:
     return ret
     
 
-def protocol_receive(size: int):
+def receive(size: int):
     global ser
     data = bytes()
     if ser.is_open == True:
